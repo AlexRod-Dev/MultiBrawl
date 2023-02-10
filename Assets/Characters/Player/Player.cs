@@ -4,9 +4,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 public class Player : MonoBehaviour
 {
+
+    Vector2 _movement;
+    Rigidbody2D _rb;
+
+    #region Run
 
     public float _speed = 500f;
     public float _jumpForce = 300f;
@@ -16,18 +22,34 @@ public class Player : MonoBehaviour
     public float _lastGroundedTime;
     public float _frictionAmount;
 
-
-    Vector2 _movement;
-
-    Rigidbody2D _rb;
-
     private bool bFacingRight = true;
+    
+
+    #endregion
+
+    #region Jump
+
+    public Transform _cellingCheck;
+    public Transform _groundCheck;
+    public LayerMask _groundObjects;
+    public float _checkRadius;
+    public int _maxjumpCount;
+    private int _jumpCount;
+
     private bool bIsGrounded;
+    private bool bIsJumping;
+
+    #endregion
+
+
+
+
 
 
 
     void Awake() => _rb = GetComponent<Rigidbody2D>();
 
+    private void Start() => _jumpCount = _maxjumpCount;
 
 
     // Update is called once per frame
@@ -79,28 +101,62 @@ public class Player : MonoBehaviour
         #endregion
 
 
-      //  if(Physics2D.OverlapBox(groundChec))
+        bIsGrounded = Physics2D.OverlapCircle(_groundCheck.position, _checkRadius, _groundObjects);
+
+        if (bIsGrounded)
+        {
+            _jumpCount = _maxjumpCount;
+            bIsJumping = false;
+        }
+       // DebugVariables();
 
     }
-
 
 
     public void OnMove(InputValue value) => _movement = value.Get<Vector2>();
 
     public void OnJump(InputValue value)
     {
-        _rb.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
+
+        Debug.Log("cliquei");
+        if(bIsGrounded && _jumpCount > 0)
+        {
+            _rb.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
+            _jumpCount--;
+        }
+        bIsJumping = true;
+       
     }
 
     private void FlipCharacter()
     {
+
+        //probably change when adding sprite to player
         if (bFacingRight)
             transform.Rotate(0f, 200f, 0f);
         else 
             transform.Rotate(0f, -200f, 0f);
+        //
 
         bFacingRight = !bFacingRight;
       
+    }
+
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(_groundCheck.position, _checkRadius);
+    }
+
+    private void DebugVariables()
+    {
+
+        Debug.Log("IsGrounded? " + bIsGrounded);
+        Debug.Log("IsOnAir? " + bIsJumping);
+        Debug.Log("JumpCount? " + _jumpCount);
+             
+
     }
 
 }
