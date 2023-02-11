@@ -37,7 +37,7 @@ public class Player : MonoBehaviour
     private int _jumpCount;
 
     private bool bIsGrounded;
-    private bool bIsJumping;
+    private bool bIsJumping = true;
 
     #endregion
 
@@ -106,7 +106,7 @@ public class Player : MonoBehaviour
         if (bIsGrounded)
         {
             _jumpCount = _maxjumpCount;
-            bIsJumping = false;
+            bIsJumping = true;
         }
        // DebugVariables();
 
@@ -118,13 +118,13 @@ public class Player : MonoBehaviour
     public void OnJump(InputValue value)
     {
 
-        Debug.Log("cliquei");
-        if(bIsGrounded && _jumpCount > 0)
+    
+        if(bIsJumping && _jumpCount > 0)
         {
             _rb.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
             _jumpCount--;
         }
-        bIsJumping = true;
+        bIsJumping = false;
        
     }
 
