@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
-public class Player : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
 
     Vector2 _movement;
@@ -19,11 +19,15 @@ public class Player : MonoBehaviour
     public float _acceleration = 1f;
     public float _decceleration = 1f;
     public float _velPower = 1f;
-    public float _lastGroundedTime;
-    public float _frictionAmount;
-
+   
     private bool bFacingRight = true;
-    
+
+    #endregion
+
+    #region Friction
+
+    public float _frictionAmount;
+    public float _lastGroundedTime;
 
     #endregion
 
@@ -100,6 +104,7 @@ public class Player : MonoBehaviour
         }
         #endregion
 
+        #region Jump
 
         bIsGrounded = Physics2D.OverlapCircle(_groundCheck.position, _checkRadius, _groundObjects);
 
@@ -108,7 +113,10 @@ public class Player : MonoBehaviour
             _jumpCount = _maxjumpCount;
             bIsJumping = true;
         }
-       // DebugVariables();
+
+        #endregion
+
+        // DebugVariables();
 
     }
 
