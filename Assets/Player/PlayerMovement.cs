@@ -14,8 +14,8 @@ public class PlayerMovement : MonoBehaviour
 
     #region Run
 
+    [Header("Run")]
     public float _speed = 500f;
-    public float _jumpForce = 300f;
     public float _acceleration = 1f;
     public float _decceleration = 1f;
     public float _velPower = 1f;
@@ -26,6 +26,7 @@ public class PlayerMovement : MonoBehaviour
 
     #region Friction
 
+    [Header("Friction")]
     public float _frictionAmount;
     public float _lastGroundedTime;
 
@@ -33,22 +34,34 @@ public class PlayerMovement : MonoBehaviour
 
     #region Jump
 
+    [Header("Jump")]
+    public float _jumpForce = 300f;
+    public int _maxjumpCount;
+    
     public Transform _cellingCheck;
     public Transform _groundCheck;
     public LayerMask _groundObjects;
     public float _checkRadius;
-    public int _maxjumpCount;
+   
     private int _jumpCount;
-
     private bool bIsGrounded;
     private bool bIsJumping = true;
 
     #endregion
 
+    #region Dash
 
+   
+    private bool bCanDash = true;
+    private bool bIsDashing;
+    [Header("Dash")]
+    public float _dashingPower = 2;
+    public float _dashingTime = 2;
+    public float _dashingCooldown = 2;
 
+    public TrailRenderer _tr;
 
-
+    #endregion
 
 
     void Awake() => _rb = GetComponent<Rigidbody2D>();
@@ -59,17 +72,13 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        //Get input
+     
+        //Get movement input
         _movement = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 
-        //Flip Sprite
-        if (_movement.x > 0 && !bFacingRight)
+        if (bIsDashing)
         {
-            FlipCharacter();
-        }
-        else if (_movement.x < 0 && bFacingRight)
-        {
-            FlipCharacter();
+            return;
         }
 
 
@@ -116,6 +125,17 @@ public class PlayerMovement : MonoBehaviour
 
         #endregion
 
+
+        //Flip Sprite
+        if (_movement.x > 0 && !bFacingRight)
+        {
+            FlipCharacter();
+        }
+        else if (_movement.x < 0 && bFacingRight)
+        {
+            FlipCharacter();
+        }
+
         // DebugVariables();
 
     }
@@ -134,6 +154,46 @@ public class PlayerMovement : MonoBehaviour
         }
         bIsJumping = false;
        
+    }
+
+    public void OnDash(InputValue value)
+    {
+        if(bCanDash)
+        {
+            StartCoroutine(Dash());
+        }
+    }
+
+    private IEnumerator Dash()
+    {
+        bCanDash = false;
+        bIsDashing = true;
+        float _originalGravity = _rb.gravityScale;
+        _rb.gravityScale = 0f;
+
+        if(_movement.x == 0)
+        {
+            if(bFacingRight)
+            {
+                _rb.velocity = new Vector2(transform.localScale.x * _dashingPower,0f);
+            }
+            if(!bFacingRight)
+            {
+                _rb.velocity = new Vector2(-transform.localScale.x * _dashingPower, 0f);
+            }
+        }
+        else
+        {
+            _rb.velocity = new Vector2(_movement.x * _dashingPower, 0f);
+        }
+       
+        _tr.emitting = true;
+        yield return new WaitForSeconds(_dashingTime);
+        _tr.emitting = false;
+        _rb.gravityScale = _originalGravity;
+        bIsDashing= false;
+        yield return new WaitForSeconds(_dashingCooldown);
+        bCanDash= true;
     }
 
     private void FlipCharacter()

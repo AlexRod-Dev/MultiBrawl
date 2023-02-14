@@ -18,8 +18,6 @@ public class Bullet : MonoBehaviour
         _rb.velocity = transform.right * _speed;
     }
 
-
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
 
